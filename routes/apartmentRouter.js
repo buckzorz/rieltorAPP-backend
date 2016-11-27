@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var Verify    = require('./verify');
 var Apartments = require('../models/apartments');
 
 var apartmentRouter = express.Router();
@@ -28,7 +29,7 @@ apartmentRouter.route('/')
         res.end('Added apartment with id: ' + id);
     })
 })
-.delete(function (req, res, next){
+.delete( Verify.verifyOrdinaryUser, Verify.verifyRieltor, function (req, res, next){
     Apartments.remove({}, function(err, resp){
         if (err) return err;
         res.json(resp);
@@ -45,7 +46,7 @@ apartmentRouter.route('/:apartmentId')
         res.json(apartment);
     });
 })
- .put(function(req, res, next){
+ .put(Verify.verifyOrdinaryUser, Verify.verifyRieltor, function(req, res, next){
     Apartments.findByIdAndUpdate(req.params.apartmentId, {
         $set: req.body
     }, {
@@ -55,7 +56,7 @@ apartmentRouter.route('/:apartmentId')
         res.json(apartment);
     });
 })
-.delete(function(req, res, next){
+.delete(Verify.verifyOrdinaryUser, Verify.verifyRieltor, function(req, res, next){
     Apartments.findByIdAndRemove(req.params.apartmentId, function(err, resp){
        if (err) return next(err);
         res.json(resp);

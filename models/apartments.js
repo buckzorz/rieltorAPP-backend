@@ -2,52 +2,68 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+var imageSchema = new Schema({
+    base64: {
+        type: String,
+    },
+    filename: {
+        type: String
+    },
+    filesize: {
+        type: Number
+    },
+    filetype: {
+        type: String
+    }
+});
+
 // create a schema
 var apartmentSchema = new Schema({
     type: {
         type: String,
-        required: true
+        required: false
     },
     renovation: {
         type: String,
-        required: true,
+        required: false,
     }, 
     elevator: {
         type: String,
-        required: true,
+        required: false,
     },
     district: {
         type: String,
-        required: true
+        required: false
     },
     rooms: {
         type: Number,
-        required: true
+        required: false
     },
     floor: {
         type: Number,
-        required: true
-    },      
+        required: false
+    },
+    area: {
+        type: Number,
+        required: false
+    }, 
     price: {
         type: Number,
-        required: true
+        required: false
     },
     address: {
         type: String,
-        required: true
+        required: false
     },
-    image: {
-        type: String,
-        required: true
-    },
+    image: [imageSchema],
     sold: {
         type: Boolean,
-        required: true,
+        required: false,
         default: false
     },
 
 }, {
-    timestamps: true
+    timestamps: false
 });
 
 // the schema is useless so far

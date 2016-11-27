@@ -4,7 +4,7 @@ var passport = require('passport');
 var User = require('../models/user');
 var Verify    = require('./verify');
 
-router.get('/', Verify.verifyOrdinaryUser, Verify.verifyRieltor, function(req, res, next) {
+router.get('/',/*, Verify.verifyOrdinaryUser, Verify.verifyRieltor,*/ function(req, res, next) {
     User.find({}, function (err, user){
         if (err) throw err;
         res.json(user);

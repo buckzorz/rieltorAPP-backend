@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+var Verify    = require('./verify');
 var Favorite = require('../models/favoriteApartment');
 var Apartment = require('../models/apartments');
 
@@ -9,7 +10,7 @@ favoriteApartmentRouter.use(bodyParser.json());
 
 favoriteApartmentRouter.route('/')
     //.all(verify.verifyOrdinaryUser)
-.get(function (req, res, next){
+.get(Verify.verifyOrdinaryUser, Verify.verifyRieltor, function (req, res, next){
     Favorite.find({'postedBy': req.decoded._doc._id})
         .populate('postedBy')
         .populate('apartments')
@@ -18,7 +19,7 @@ favoriteApartmentRouter.route('/')
             res.json(favorites);
     });
 })
-.post(function (req, res, next){
+.post(Verify.verifyOrdinaryUser, function (req, res, next){
     Favorite.find({'postedBy': req.decoded._doc._id})
         .exec(function (err, favorites){
         if (err) return next(err);
@@ -56,7 +57,7 @@ favoriteApartmentRouter.route('/')
             }
         });
     })
-.delete(function (req, res, next) {
+.delete( Verify.verifyOrdinaryUser, function (req, res, next) {
     Favorite.remove({'postedBy': req.decoded._doc._id}, function (err, resp) {
         if (err) throw err;
         res.json(resp);
@@ -65,7 +66,7 @@ favoriteApartmentRouter.route('/')
 
 favoriteApartmentRouter.route('/:apartmentId')
     //.all(verify.verifyOrdinaryUser)
-    .delete(function (req, res, next){
+    .delete(Verify.verifyOrdinaryUser, function (req, res, next){
         Favorites.find({'postedBy': req.decoded._doc._id}, function (err, favorites) {
             if (err) return next(err);
             var favorite = favorites ? favorites[0] : null;
