@@ -11,6 +11,7 @@ apartmentRouter.use(bodyParser.json());
 apartmentRouter.route('/')
 
 .get(function (req, res, next) {
+
     Apartments.find(req.query)
         .exec(function (err, apartment){
         if (err) return next(err);

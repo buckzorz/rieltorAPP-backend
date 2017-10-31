@@ -20,6 +20,7 @@ exports.verifyOrdinaryUser = function (req, res, next) {
                 return next(err);
             } else {
                 req.decoded = decoded;
+                console.log(req);
                 next()
             }
         });

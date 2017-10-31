@@ -5,7 +5,8 @@ var User = require('../models/user');
 var Verify    = require('./verify');
 
 router.get('/',/*, Verify.verifyOrdinaryUser, Verify.verifyRieltor,*/ function(req, res, next) {
-    User.find({}, function (err, user){
+    //rieltor: false is for getting ONLY the users that are not marked as a rieltor:true
+    User.find({rieltor: false}, function (err, user){
         if (err) throw err;
         res.json(user);
     });
@@ -31,6 +32,9 @@ router.post('/register', function(req, res) {
             }
             if(req.body.birthdate) {
                 user.birthdate = req.body.birthdate;
+            }
+            if(req.body.rieltor) {
+                user.rieltor = req.body.rieltor;
             }
         user.save(function(err, user) {
             passport.authenticate('local')(req, res, function (){
@@ -58,11 +62,12 @@ router.post('/login', function(req,res,next){
             }
             
             var token = Verify.getToken({"username": user.username, "_id":user._id, "rieltor":user.rieltor});
-            
+            console.log(user.rieltor);
             res.status(200).json({
                 status: 'Login successful',
                 success: true,
-                token: token
+                token: token,
+                rieltor: user.rieltor
             });
         });
     })(req,res,next);

@@ -4,67 +4,121 @@ var mongoose = require('mongoose');
 var Verify    = require('./verify');
 var Favorite = require('../models/favoriteApartment');
 var Apartment = require('../models/apartments');
+var User = require('../models/user');
+
 
 var favoriteApartmentRouter = express.Router();
 favoriteApartmentRouter.use(bodyParser.json());
 
 favoriteApartmentRouter.route('/')
     //.all(verify.verifyOrdinaryUser)
-.get(Verify.verifyOrdinaryUser, Verify.verifyRieltor, function (req, res, next){
-    Favorite.find({'postedBy': req.decoded._doc._id})
+.get(Verify.verifyOrdinaryUser, function (req, res, next) {
+    console.log(req);
+    Favorite.find({'postedBy': req.decoded._id})
+        .populate('postedBy')
+        .populate('apartments')
+        .exec(function (err, apartment){
+        if (err) return next(err);
+        res.json(apartment);
+    });
+})
+/*.get(Verify.verifyOrdinaryUser, function (req, res, next){
+    Favorite.findOne(req.query)
         .populate('postedBy')
         .populate('apartments')
         .exec(function (err, favorites){
             if (err) return next(err);
             res.json(favorites);
     });
-})
+})*/
 .post(Verify.verifyOrdinaryUser, function (req, res, next){
-    Favorite.find({'postedBy': req.decoded._doc._id})
-        .exec(function (err, favorites){
-        if (err) return next(err);
-        req.body.postedBy = req.decoded._doc._id;
-        
-        if(favorites.length) {
+    Favorite.find({'postedBy': req.decoded._id})
+        .exec(function (err, client){
+        if (err) throw err;
+        if(client.length){
             var favoriteAlreadyExists = false;
-            if(favorites[0].apartments.length){
-                for(var i = (favorites[0].apartments.length - 1); i >= 0; i--){
-                    favoriteAlreadyExists = favorites[0].apartments[i] == req.body._id;
+            if(client[0].apartments.length){
+                for (var i = (client[0].apartments.length - 1); i >=0; i--){
+                favoriteAlreadyExists = client[0].apartments[i] == req.body._id;
+                     if (favoriteAlreadyExists) break;
+                }
+            }
+            if (!favoriteAlreadyExists) {
+                client[0].apartments.push(req.body._id);
+                client[0].save(function (err, client){
+                    if (err) throw err;
+                    console.log('Added favorite');
+                    res.json(client);
+                });
+            } else {
+                console.log('done');
+                res.json(client)
+            }
+        } else {
+            Favorite.create({postedBy: req.decoded._id}, function (err, client){
+                if (err) throw err;
+                client.apartments.push(req.body.id);
+                client.save(function (err, client){
+                    if (err) throw err;
+                    console.log('Added fav');
+                    res.json(client);
+                });
+            })
+        }
+        /*        if (err) throw err;
+        req.body.postedBy = req.decoded._id;
+        console.log(apartments);
+        console.log("apartments.length " + apartments.length);
+        if(apartments.length) {
+            var favoriteAlreadyExists = false;
+            if(apartments[0].apartments.length){
+                console.log("apartments[0].apartments.length:" + apartments[0].apartments.length);
+                for(var i = (apartments[0].apartments.length - 1); i >= 0; i--){
+                    favoriteAlreadyExists = apartments[0].apartments[i] == req.body._id;
                     if (favoriteAlreadyExists) break;
                 }
             }
             if(!favoriteAlreadyExists) {
-                favorites[0].apartments.push(req.body._id);
-                favorites[0].save(function (err, favorite){
-                    if (err) return next(err);
+                apartments[0].apartments.push(req.body._id);
+                apartments[0].save(function (err, apartment){
+                    if (err) throw err;
                     console.log('added favorite');
-                    res.json(favorite);
+                    res.json(apartment);
                 });
             } else{
                 console.log('done');
-                res.json(favorites);
+                res.json(apartments);
             }
             } else {
                 Favorite.create({postedBy: req.body.postedBy}, function(err, resp){
                     if (err) throw err;
-                    favorite.apartments.push(req.body._id);
-                    favorite.save(function (err, favorite) {
+                    apartments.apartments.push(req.body._id);
+                    apartments.save(function (err, apartment) {
                         if (err) throw err;
                         console.log('Added favorite!');
-                        res.json(favorite);
+                        res.json(apartment);
                     });
                 })
-            }
+            }*/
         });
     })
-.delete( Verify.verifyOrdinaryUser, function (req, res, next) {
+.delete(Verify.verifyOrdinaryUser, function (req, res, next) {
     Favorite.remove({'postedBy': req.decoded._doc._id}, function (err, resp) {
         if (err) throw err;
         res.json(resp);
     })
 });
 
-favoriteApartmentRouter.route('/:apartmentId')
+favoriteApartmentRouter.route('/:postedBy')
+    .get(Verify.verifyOrdinaryUser, function (req, res, next) {
+        Favorite.find({'postedBy': req.decoded._id})
+            .populate('postedBy')
+            .populate('apartments')
+            .exec(function (err, apartment){
+            if (err) return next(err);
+            res.json(apartment);
+        });
+    })
     //.all(verify.verifyOrdinaryUser)
     .delete(Verify.verifyOrdinaryUser, function (req, res, next){
         Favorites.find({'postedBy': req.decoded._doc._id}, function (err, favorites) {

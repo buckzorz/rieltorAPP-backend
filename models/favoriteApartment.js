@@ -6,12 +6,11 @@ var favoriteApartmentSchema = new Schema({
     postedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true
     },
     
     apartments: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Apartments'
+        ref: 'Apartment'
     }]},
     {
        timestamps : true 
